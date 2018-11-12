@@ -219,7 +219,7 @@ Signature.signHash = function(dataSha256, privateKey, encoding = 'hex') {
     var der, e, ecsignature, i, lenR, lenS, nonce;
     i = null;
     // nonce = 0;
-    nonce = uniqueNonce()
+    nonce = Math.random() * 10000000
     e = BigInteger.fromBuffer(dataSha256);
     while (true) {
       ecsignature = ecdsa.sign(curve, dataSha256, privateKey.d, nonce++);
