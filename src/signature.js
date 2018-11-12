@@ -183,6 +183,20 @@ Signature.sign = function(data, privateKey, encoding = 'utf8') {
     return Signature.signHash(data, privateKey)
 }
 
+function uniqueNonce() {
+  if(unique_nonce_entropy === null) {
+      const b = new Uint8Array(randomBytes(2))
+      unique_nonce_entropy = parseInt(b[0] << 8 | b[1], 10)
+  }
+  let long = Long.fromNumber(Date.now())
+  const entropy = ++unique_nonce_entropy % 0xFFFF
+  // console.log('uniqueNonce date\t', ByteBuffer.allocate(8).writeUint64(long).toHex(0))
+  // console.log('uniqueNonce entropy\t', ByteBuffer.allocate(8).writeUint64(Long.fromNumber(entropy)).toHex(0))
+  long = long.shiftLeft(16).or(Long.fromNumber(entropy));
+  // console.log('uniqueNonce final\t', ByteBuffer.allocate(8).writeUint64(long).toHex(0))
+  return long.toString()
+}
+
 /**
     Sign a buffer of exactally 32 bytes in size (sha256(text))
 
@@ -204,7 +218,8 @@ Signature.signHash = function(dataSha256, privateKey, encoding = 'hex') {
 
     var der, e, ecsignature, i, lenR, lenS, nonce;
     i = null;
-    nonce = 0;
+    // nonce = 0;
+    nonce = uniqueNonce()
     e = BigInteger.fromBuffer(dataSha256);
     while (true) {
       ecsignature = ecdsa.sign(curve, dataSha256, privateKey.d, nonce++);
